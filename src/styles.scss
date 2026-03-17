@@ -6,6 +6,9 @@
 @import '@ionic/angular/css/structure.css';
 @import '@ionic/angular/css/typography.css';
 
+// Mapbox GL CSS
+@import 'mapbox-gl/dist/mapbox-gl.css';
+
 html {
   height: 100%;
   @include mat.theme(
