@@ -35,3 +35,43 @@ body {
 * {
   box-sizing: border-box;
 }
+
+// Mapbox route hover popup
+.mapboxgl-popup.weather-popup {
+  .mapboxgl-popup-content {
+    background: rgba(15, 15, 28, 0.95);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+  }
+
+  .mapboxgl-popup-tip {
+    border-top-color: rgba(15, 15, 28, 0.95);
+  }
+}
+
+.weather-popup-content {
+  padding: 7px 13px;
+  font-size: 13px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+
+  strong {
+    color: #fff;
+    font-weight: 600;
+  }
+}
+
+.rain-dot {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
