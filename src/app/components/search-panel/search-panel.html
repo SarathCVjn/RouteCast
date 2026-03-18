@@ -106,5 +106,45 @@
       </div>
     }
 
+    <!-- Route Options -->
+    @if (routeOptions().length > 0) {
+      <div class="route-options">
+        @for (route of routeOptions(); track route.index) {
+          <div
+            class="route-card"
+            [class.selected]="selectedRouteIndex() === route.index"
+            (click)="selectRoute(route.index)">
+
+            <div class="route-card-top">
+              <div class="route-card-left">
+                <span class="route-badge" [class.badge-fastest]="routeLabel(route, routeOptions()) === 'Fastest'"
+                  [class.badge-shortest]="routeLabel(route, routeOptions()) === 'Shortest'">
+                  {{ routeLabel(route, routeOptions()) }}
+                </span>
+                <div class="route-stats">
+                  <span class="route-distance">{{ formatDistance(route.distance) }}</span>
+                  <span class="route-sep">·</span>
+                  <span class="route-duration">{{ formatDuration(route.duration) }}</span>
+                </div>
+              </div>
+              <div class="route-avg-rain">
+                <span class="rain-circle" [style.background]="route.weatherSegments[Math.floor(route.weatherSegments.length/2)]?.color ?? '#4CAF50'"></span>
+                <span class="rain-pct">{{ route.avgRainProbability }}%</span>
+              </div>
+            </div>
+
+            <!-- Weather colour bar -->
+            <div class="weather-bar">
+              @for (seg of route.weatherSegments; track $index) {
+                <div class="weather-bar-seg" [style.background-color]="seg.color"
+                  [title]="seg.rainProbability + '% rain at this point'"></div>
+              }
+            </div>
+
+          </div>
+        }
+      </div>
+    }
+
   </ion-card-content>
 </ion-card>

@@ -120,3 +120,118 @@
     color: #ef5350;
   }
 }
+
+.route-options {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.route-card {
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: border-color 0.18s, background 0.18s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.07);
+  }
+
+  &.selected {
+    border-color: var(--ion-color-primary);
+    background: rgba(66, 133, 244, 0.1);
+  }
+}
+
+.route-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.route-card-left {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.route-badge {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: rgba(255, 255, 255, 0.45);
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.07);
+  width: fit-content;
+
+  &.badge-fastest {
+    color: #69f0ae;
+    background: rgba(105, 240, 174, 0.12);
+  }
+
+  &.badge-shortest {
+    color: #40c4ff;
+    background: rgba(64, 196, 255, 0.12);
+  }
+}
+
+.route-stats {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 2px;
+
+  .route-distance {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .route-sep {
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 13px;
+  }
+
+  .route-duration {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+  }
+}
+
+.route-avg-rain {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  .rain-circle {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .rain-pct {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 500;
+  }
+}
+
+.weather-bar {
+  display: flex;
+  height: 5px;
+  border-radius: 3px;
+  overflow: hidden;
+  gap: 1px;
+
+  .weather-bar-seg {
+    flex: 1;
+    border-radius: 1px;
+  }
+}
