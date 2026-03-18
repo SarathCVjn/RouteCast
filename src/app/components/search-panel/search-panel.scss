@@ -1,0 +1,122 @@
+.search-card {
+  width: 360px;
+  margin: 0;
+  border-radius: 16px;
+  background: rgba(15, 15, 25, 0.92);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+
+  ion-card-header {
+    padding-bottom: 4px;
+  }
+
+  ion-card-content {
+    padding-top: 8px;
+  }
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  .app-icon {
+    font-size: 30px;
+    color: var(--ion-color-primary);
+  }
+
+  ion-card-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.3px;
+  }
+}
+
+.input-group {
+  position: relative;
+  margin-bottom: 6px;
+
+  .input-item {
+    --background: rgba(255, 255, 255, 0.05);
+    --border-radius: 10px;
+    --padding-start: 12px;
+    --color: #ffffff;
+    --placeholder-color: rgba(255, 255, 255, 0.4);
+    border-radius: 10px;
+    margin-bottom: 2px;
+  }
+}
+
+.suggestions-list {
+  position: absolute;
+  z-index: 100;
+  width: 100%;
+  background: #1a1a2e;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  max-height: 200px;
+  overflow-y: auto;
+  top: calc(100% + 2px);
+  left: 0;
+
+  ion-item {
+    --background: transparent;
+    --background-hover: rgba(255, 255, 255, 0.06);
+    cursor: pointer;
+  }
+
+  .suggestion-label {
+    font-size: 13px;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+    color: rgba(255, 255, 255, 0.85);
+  }
+}
+
+.departure-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 6px;
+
+  .departure-item {
+    flex: 1;
+    --background: rgba(255, 255, 255, 0.05);
+    --border-radius: 10px;
+    --color: #ffffff;
+    border-radius: 10px;
+  }
+}
+
+.search-btn {
+  margin-top: 10px;
+  --border-radius: 12px;
+  height: 48px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.error-msg {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: rgba(244, 67, 54, 0.12);
+  border: 1px solid rgba(244, 67, 54, 0.3);
+  border-radius: 8px;
+  color: #ef9a9a;
+  font-size: 13px;
+
+  ion-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    color: #ef5350;
+  }
+}

@@ -1,0 +1,110 @@
+<ion-card class="search-card">
+  <!-- Header -->
+  <ion-card-header>
+    <div class="panel-header">
+      <ion-icon name="navigate-circle-outline" class="app-icon"></ion-icon>
+      <ion-card-title>RouteCast</ion-card-title>
+    </div>
+  </ion-card-header>
+
+  <ion-card-content>
+
+    <!-- Origin -->
+    <div class="input-group">
+      <ion-item lines="full" class="input-item">
+        <ion-icon name="locate-outline" slot="start" color="primary"></ion-icon>
+        <ion-input
+          label="From"
+          labelPlacement="floating"
+          [value]="originQuery()"
+          (ionInput)="onOriginInput($event)"
+          placeholder="Starting point"
+          clearInput="true">
+        </ion-input>
+      </ion-item>
+      @if (originSuggestions().length > 0) {
+        <ion-list class="suggestions-list">
+          @for (s of originSuggestions(); track s.id) {
+            <ion-item button detail="false" lines="full" (click)="selectOrigin(s)">
+              <ion-icon name="location-outline" slot="start" color="medium"></ion-icon>
+              <ion-label class="suggestion-label">{{ s.place_name }}</ion-label>
+            </ion-item>
+          }
+        </ion-list>
+      }
+    </div>
+
+    <!-- Destination -->
+    <div class="input-group">
+      <ion-item lines="full" class="input-item">
+        <ion-icon name="flag-outline" slot="start" color="danger"></ion-icon>
+        <ion-input
+          label="To"
+          labelPlacement="floating"
+          [value]="destinationQuery()"
+          (ionInput)="onDestinationInput($event)"
+          placeholder="Destination"
+          clearInput="true">
+        </ion-input>
+      </ion-item>
+      @if (destinationSuggestions().length > 0) {
+        <ion-list class="suggestions-list">
+          @for (s of destinationSuggestions(); track s.id) {
+            <ion-item button detail="false" lines="full" (click)="selectDestination(s)">
+              <ion-icon name="location-outline" slot="start" color="medium"></ion-icon>
+              <ion-label class="suggestion-label">{{ s.place_name }}</ion-label>
+            </ion-item>
+          }
+        </ion-list>
+      }
+    </div>
+
+    <!-- Departure -->
+    <div class="departure-row">
+      <ion-item lines="full" class="departure-item">
+        <ion-icon name="calendar-outline" slot="start"></ion-icon>
+        <ion-input
+          label="Date"
+          labelPlacement="floating"
+          type="date"
+          [value]="departureDate()"
+          (ionChange)="onDateChange($event)">
+        </ion-input>
+      </ion-item>
+      <ion-item lines="full" class="departure-item">
+        <ion-icon name="time-outline" slot="start"></ion-icon>
+        <ion-input
+          label="Time"
+          labelPlacement="floating"
+          type="time"
+          [value]="departureTime()"
+          (ionChange)="onTimeChange($event)">
+        </ion-input>
+      </ion-item>
+    </div>
+
+    <!-- Search Button -->
+    <ion-button
+      expand="block"
+      class="search-btn"
+      (click)="searchRoute()"
+      [disabled]="isLoading()">
+      @if (isLoading()) {
+        <ion-spinner name="crescent" slot="start"></ion-spinner>
+        Finding routes...
+      } @else {
+        <ion-icon name="search-outline" slot="start"></ion-icon>
+        Get Routes with Weather
+      }
+    </ion-button>
+
+    <!-- Error -->
+    @if (error()) {
+      <div class="error-msg">
+        <ion-icon name="warning-outline"></ion-icon>
+        <span>{{ error() }}</span>
+      </div>
+    }
+
+  </ion-card-content>
+</ion-card>
