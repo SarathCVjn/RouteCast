@@ -12,6 +12,8 @@ export class MapService {
   private map: mapboxgl.Map | null = null;
   private originMarker: mapboxgl.Marker | null = null;
   private destinationMarker: mapboxgl.Marker | null = null;
+  private hoverPopup: mapboxgl.Popup | null = null;
+  private routeLabels: mapboxgl.Marker[] = [];
 
   readonly mapReady = signal(false);
   readonly routeClicked$ = new Subject<number>();
@@ -32,6 +34,7 @@ export class MapService {
 
     this.map.on('load', () => {
       this.mapReady.set(true);
+      this.setupHoverInteraction();
       this.centerOnUserLocation();
     });
   }
@@ -128,10 +131,12 @@ export class MapService {
         step.geometry.coordinates[0] as [number, number],
         selected.weatherSegments
       );
+      const arrivalTime = new Date(departureTime.getTime() + cumulativeMs);
+      const timeStr = arrivalTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       cumulativeMs += step.duration * 1000;
       return {
         type: 'Feature' as const,
-        properties: { color: nearest.color, rainProbability: nearest.rainProbability },
+        properties: { color: nearest.color, rainProbability: nearest.rainProbability, arrivalTime: timeStr },
         geometry: step.geometry,
       };
     });
@@ -154,6 +159,9 @@ export class MapService {
       paint: { 'line-color': ['get', 'color'], 'line-width': 6 },
       layout: { 'line-cap': 'round', 'line-join': 'round' },
     });
+
+    // --- 10 persistent weather labels along the selected route ---
+    this.addRouteLabels(selected, departureTime);
   }
 
   addRouteMarkers(origin: [number, number], destination: [number, number]): void {
@@ -195,6 +203,7 @@ export class MapService {
     this.clearRouteLayers();
     this.originMarker?.remove();
     this.destinationMarker?.remove();
+    this.hoverPopup?.remove();
     this.originMarker = null;
     this.destinationMarker = null;
   }
@@ -206,6 +215,113 @@ export class MapService {
     });
     ['route-selected', 'routes-other'].forEach((id) => {
       if (this.map!.getSource(id)) this.map!.removeSource(id);
+    });
+    this.routeLabels.forEach((m) => m.remove());
+    this.routeLabels = [];
+  }
+
+  /**
+   * Places 10 evenly-spaced labels along the route.
+   * Each label shows the rain probability and the ETA at that point.
+   */
+  private addRouteLabels(route: RouteOption, departureTime: Date): void {
+    if (!this.map) return;
+
+    const totalMs = route.steps.reduce((sum, s) => sum + s.duration * 1000, 0);
+
+    for (let i = 0; i < 10; i++) {
+      // Place labels at 5%, 15%, 25%, ..., 95% of route — midpoints of each 10th
+      const fraction = (i + 0.5) / 10;
+      const targetMs = totalMs * fraction;
+
+      const coord = this.getPointAtDuration(route.steps, targetMs);
+      if (!coord) continue;
+
+      const arrivalTime = new Date(departureTime.getTime() + targetMs);
+      const timeStr = arrivalTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      const nearest = this.findNearestSegment(coord, route.weatherSegments);
+      const rain = Math.round(nearest.rainProbability);
+      const color = nearest.color;
+
+      const el = document.createElement('div');
+      el.style.pointerEvents = 'none';
+      el.innerHTML = `
+        <div style="display:flex;flex-direction:column;align-items:center;">
+          <div style="
+            background:rgba(12,12,24,0.9);
+            border:1px solid rgba(255,255,255,0.12);
+            border-radius:8px;
+            padding:3px 8px;
+            display:flex;flex-direction:column;align-items:center;
+            backdrop-filter:blur(8px);
+            box-shadow:0 2px 10px rgba(0,0,0,0.55);
+          ">
+            <span style="font-size:12px;font-weight:700;color:${color};font-family:-apple-system,sans-serif;">${rain}%</span>
+            <span style="font-size:9px;color:rgba(255,255,255,0.5);font-family:-apple-system,sans-serif;margin-top:-1px;">${timeStr}</span>
+          </div>
+          <div style="width:1px;height:6px;background:rgba(255,255,255,0.2);"></div>
+          <div style="width:6px;height:6px;background:${color};border-radius:50%;border:1px solid rgba(255,255,255,0.35);"></div>
+        </div>`;
+
+      const marker = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
+        .setLngLat(coord)
+        .addTo(this.map!);
+
+      this.routeLabels.push(marker);
+    }
+  }
+
+  /**
+   * Walks through the steps and returns the coordinate at the given cumulative duration.
+   */
+  private getPointAtDuration(steps: MapboxStep[], targetMs: number): [number, number] | null {
+    let cumMs = 0;
+    for (const step of steps) {
+      const stepMs = step.duration * 1000;
+      if (cumMs + stepMs >= targetMs) {
+        const fraction = stepMs > 0 ? (targetMs - cumMs) / stepMs : 0;
+        const coords = step.geometry.coordinates;
+        const idx = Math.min(Math.floor(fraction * coords.length), coords.length - 1);
+        return coords[idx];
+      }
+      cumMs += stepMs;
+    }
+    // Past the end — return last coordinate of last step
+    const lastStep = steps[steps.length - 1];
+    return lastStep?.geometry.coordinates[lastStep.geometry.coordinates.length - 1] ?? null;
+  }
+
+  private setupHoverInteraction(): void {
+    if (!this.map) return;
+    this.hoverPopup = new mapboxgl.Popup({
+      closeButton: false,
+      closeOnClick: false,
+      className: 'weather-popup',
+      offset: 12,
+    });
+
+    this.map.on('mousemove', 'route-selected-line', (e) => {
+      this.map!.getCanvas().style.cursor = 'pointer';
+      const feature = e.features?.[0];
+      if (!feature?.properties) return;
+      const rain = Math.round(feature.properties['rainProbability'] ?? 0);
+      const color = feature.properties['color'] ?? '#4CAF50';
+      const time = feature.properties['arrivalTime'] ?? '';
+      this.hoverPopup!
+        .setLngLat(e.lngLat)
+        .setHTML(
+          `<div class="weather-popup-content">
+            <span class="rain-dot" style="background:${color}"></span>
+            Rain: <strong>${rain}%</strong>${time ? ` &middot; ${time}` : ''}
+          </div>`
+        )
+        .addTo(this.map!);
+    });
+
+    this.map.on('mouseleave', 'route-selected-line', () => {
+      this.map!.getCanvas().style.cursor = '';
+      this.hoverPopup?.remove();
     });
   }
 
