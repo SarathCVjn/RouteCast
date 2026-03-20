@@ -34,7 +34,7 @@ jobs:
         run: npm ci
 
       - name: Build Angular app
-        run: npm run build -- --configuration production --build-href /RouteCast/
+        run: npm run build -- --configuration production --base-href /RouteCast/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
