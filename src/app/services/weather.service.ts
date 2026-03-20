@@ -17,27 +17,29 @@ export class WeatherService {
     if (waypoints.length === 0) return of([]);
 
     const requests = waypoints.map((wp) =>
-      this.getRainProbability(wp.coordinates[1], wp.coordinates[0], wp.arrivalTime)
+      this.getWeatherAtPoint(wp.coordinates[1], wp.coordinates[0], wp.arrivalTime)
     );
 
     return forkJoin(requests).pipe(
-      map((probabilities) =>
+      map((results) =>
         waypoints.map((wp, i) => ({
           coordinates: wp.coordinates,
-          rainProbability: probabilities[i],
-          color: this.getRainColor(probabilities[i]),
+          rainProbability: results[i].rain,
+          temperature: results[i].temp,
+          color: this.getRainColor(results[i].rain),
         }))
       )
     );
   }
 
-  private getRainProbability(lat: number, lon: number, targetTime: Date): Observable<number> {
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat.toFixed(4)}&longitude=${lon.toFixed(4)}&hourly=precipitation_probability&timezone=auto&forecast_days=7`;
+  private getWeatherAtPoint(lat: number, lon: number, targetTime: Date): Observable<{ rain: number; temp: number }> {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat.toFixed(4)}&longitude=${lon.toFixed(4)}&hourly=precipitation_probability,temperature_2m&timezone=auto&forecast_days=7`;
 
     return this.http.get<any>(url).pipe(
       map((response) => {
         const times: string[] = response.hourly.time;
         const probs: number[] = response.hourly.precipitation_probability;
+        const temps: number[] = response.hourly.temperature_2m;
         const targetMs = targetTime.getTime();
 
         let closestIndex = 0;
@@ -50,9 +52,12 @@ export class WeatherService {
           }
         });
 
-        return probs[closestIndex] ?? 0;
+        return {
+          rain: probs[closestIndex] ?? 0,
+          temp: temps[closestIndex] ?? 0,
+        };
       }),
-      catchError(() => of(0))
+      catchError(() => of({ rain: 0, temp: 0 }))
     );
   }
 

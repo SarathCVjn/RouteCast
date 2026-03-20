@@ -7,6 +7,7 @@ export interface GeocodeSuggestion {
 export interface WeatherSegment {
   coordinates: [number, number];
   rainProbability: number;
+  temperature: number; // °C at this waypoint's ETA
   color: string;
 }
 

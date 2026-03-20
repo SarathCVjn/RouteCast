@@ -136,7 +136,7 @@ export class MapService {
       cumulativeMs += step.duration * 1000;
       return {
         type: 'Feature' as const,
-        properties: { color: nearest.color, rainProbability: nearest.rainProbability, arrivalTime: timeStr },
+        properties: { color: nearest.color, rainProbability: nearest.rainProbability, temperature: nearest.temperature, arrivalTime: timeStr },
         geometry: step.geometry,
       };
     });
@@ -242,6 +242,7 @@ export class MapService {
 
       const nearest = this.findNearestSegment(coord, route.weatherSegments);
       const rain = Math.round(nearest.rainProbability);
+      const temp = Math.round(nearest.temperature);
       const color = nearest.color;
 
       const el = document.createElement('div');
@@ -258,6 +259,7 @@ export class MapService {
             box-shadow:0 2px 10px rgba(0,0,0,0.55);
           ">
             <span style="font-size:12px;font-weight:700;color:${color};font-family:-apple-system,sans-serif;">${rain}%</span>
+            <span style="font-size:10px;font-weight:600;color:rgba(255,255,255,0.75);font-family:-apple-system,sans-serif;margin-top:1px;">${temp}°C</span>
             <span style="font-size:9px;color:rgba(255,255,255,0.5);font-family:-apple-system,sans-serif;margin-top:-1px;">${timeStr}</span>
           </div>
           <div style="width:1px;height:6px;background:rgba(255,255,255,0.2);"></div>
@@ -306,6 +308,7 @@ export class MapService {
       const feature = e.features?.[0];
       if (!feature?.properties) return;
       const rain = Math.round(feature.properties['rainProbability'] ?? 0);
+      const temp = Math.round(feature.properties['temperature'] ?? 0);
       const color = feature.properties['color'] ?? '#4CAF50';
       const time = feature.properties['arrivalTime'] ?? '';
       this.hoverPopup!
@@ -313,7 +316,7 @@ export class MapService {
         .setHTML(
           `<div class="weather-popup-content">
             <span class="rain-dot" style="background:${color}"></span>
-            Rain: <strong>${rain}%</strong>${time ? ` &middot; ${time}` : ''}
+            Rain: <strong>${rain}%</strong> &middot; ${temp}°C${time ? ` &middot; ${time}` : ''}
           </div>`
         )
         .addTo(this.map!);
